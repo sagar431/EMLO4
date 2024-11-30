@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+data/
+*.pth
+checkpoints/
+.env
+.venv
+env/
+venv/
+ENV/

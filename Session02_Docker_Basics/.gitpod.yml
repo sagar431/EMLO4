@@ -1,0 +1,12 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: |
+      chmod +x tests/grading.sh
+    command: |
+      echo "Environment ready! Run ./tests/grading.sh to start testing"
+
+ports:
+  - port: 8888
+    onOpen: ignore
