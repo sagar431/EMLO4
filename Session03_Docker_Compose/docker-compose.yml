@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  train:
+    build: .
+    command: python train.py
+    volumes:
+      - mnist:/mnist
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  evaluate:
+    build: .
+    command: python eval.py
+    volumes:
+      - mnist:/mnist
+    depends_on:
+      - train
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  infer:
+    build: .
+    command: python infer.py
+    volumes:
+      - mnist:/mnist
+    depends_on:
+      - evaluate
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+volumes:
+  mnist:
