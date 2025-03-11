@@ -1,0 +1,13 @@
+FROM satyajitghana/pytorch:2.3.1
+
+WORKDIR /workspace
+
+# Install any missing dependencies
+RUN pip install --no-cache-dir matplotlib
+
+# Copy the model and evaluation code
+COPY model.py /workspace/
+COPY model-eval/evaluate.py /workspace/
+COPY model-eval/check_eval.py /workspace/
+
+CMD ["python", "evaluate.py"]

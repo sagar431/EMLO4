@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  train:
+    build:
+      context: .
+      dockerfile: model-train/Dockerfile.train
+    volumes:
+      - mnist:/opt/mount
+    command: python train.py
+
+  evaluate:
+    build:
+      context: .
+      dockerfile: model-eval/Dockerfile.eval
+    volumes:
+      - mnist:/opt/mount
+    command: python evaluate.py
+    depends_on:
+      - train
+
+  infer:
+    build:
+      context: .
+      dockerfile: model-inference/Dockerfile.infer
+    volumes:
+      - mnist:/opt/mount
+    command: python infer.py
+    depends_on:
+      - evaluate
+
+volumes:
+  mnist:
+    driver: local 
