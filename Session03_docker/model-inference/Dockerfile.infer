@@ -1,0 +1,12 @@
+FROM satyajitghana/pytorch:2.3.1
+
+WORKDIR /workspace
+
+# Install matplotlib for visualization
+RUN pip install matplotlib
+
+# Copy the model and inference code
+COPY model.py /workspace/
+COPY model-inference/infer.py /workspace/
+
+CMD ["python", "infer.py"]
