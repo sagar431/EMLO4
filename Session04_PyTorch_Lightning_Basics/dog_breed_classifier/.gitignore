@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# VS Code
+.vscode/
+.vscode-server/
+*.code-workspace
+.history/
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env/
+
+# Project specific
+data/
+logs/
+checkpoints/
+predictions/
+input_images/
+*.pt
+*.pth
+*.ckpt
+*.log
+wandb/
+lightning_logs/
+best_model_path.txt
+test_samples/
+
+# Docker
+.docker/
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# System and hidden directories
+.bashrc
+.profile
+.ssh/
+.local/
+.wget-hsts
+.jupyter/
+.launchpadlib/
+.dotnet/
+.codeium/
+.devcontainer/
+.windsurf-server/
