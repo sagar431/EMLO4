@@ -1,0 +1,17 @@
+services:
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - 3000:8000
+        environment:
+             TENOR_API_KEY: "AIzaSyBuF1WSm-1EkrvXczNWynfVZinnqDoGaAY"
+        depends_on:
+            - redis
+    redis:
+        image: redis:latest
+        volumes:
+            - redis-data:/data
+volumes:
+    redis-data:
