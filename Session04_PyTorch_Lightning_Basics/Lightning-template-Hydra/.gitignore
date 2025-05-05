@@ -44,7 +44,7 @@ logs/
 data/
 
 # Predictions
-predictions/
+
 
 # System
 .DS_Store
