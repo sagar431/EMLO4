@@ -72,8 +72,9 @@ Session*/*/.venv/
 Session*/*/wandb/
 Session*/*/checkpoints/
 
-# Specific Session04 path
+# Specific Session04 paths
 Session04_PyTorch_Lightning_Basics/Lightning-template-Hydra/data/
+Session04_PyTorch_Lightning_Basics/Lightning-template-Hydra/logs/catdog_classification/*.ckpt
 
 # Distribution / packaging
 .Python
