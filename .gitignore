@@ -72,6 +72,9 @@ Session*/*/.venv/
 Session*/*/wandb/
 Session*/*/checkpoints/
 
+# Specific Session04 path
+Session04_PyTorch_Lightning_Basics/Lightning-template-Hydra/data/
+
 # Distribution / packaging
 .Python
 build/
