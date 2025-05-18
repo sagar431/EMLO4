@@ -30,7 +30,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: session-05
+          ref: main
           fetch-depth: 1  # Shallow clone to save space
 
       - name: Setup Python
