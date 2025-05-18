@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -30,7 +30,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
           fetch-depth: 1  # Shallow clone to save space
 
       - name: Setup Python
