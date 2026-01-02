@@ -3,9 +3,11 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import lightning as L
+from lightning.pytorch.callbacks import ModelCheckpoint, RichProgressBar, RichModelSummary
 import torch
 import torch.nn.functional as F
 from src.datamodule import DogBreedDataModule
+from src.utils.logging_config import setup_logging
 from loguru import logger
 from rich.console import Console
 from rich.table import Table
@@ -65,6 +67,7 @@ def main():
         batch_size=batch_size,
         num_workers=num_workers
     )
+    datamodule.prepare_data()  # Download dataset if needed
     datamodule.setup()
 
     # Get class mapping
@@ -82,7 +85,7 @@ def main():
     logger.info(f"Class mapping: {class_mapping}")
 
     # Callbacks
-    checkpoint_callback = L.callbacks.ModelCheckpoint(
+    checkpoint_callback = ModelCheckpoint(
         dirpath='checkpoints',
         filename='dog-breed-{epoch:02d}-{val_acc:.2f}',
         monitor='val_acc',
@@ -96,8 +99,8 @@ def main():
         accelerator='auto',
         devices=1,
         callbacks=[
-            L.callbacks.RichProgressBar(),
-            L.callbacks.RichModelSummary(max_depth=2),
+            RichProgressBar(),
+            RichModelSummary(max_depth=2),
             checkpoint_callback
         ],
         logger=True

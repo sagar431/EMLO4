@@ -14,10 +14,9 @@ RUN pip install -r requirements.txt
 
 # Copy the source code
 COPY src/ src/
-COPY checkpoints/ checkpoints/
 
-# Create necessary directories
-RUN mkdir -p data logs predictions
+# Create necessary directories (checkpoints will be mounted at runtime)
+RUN mkdir -p data logs predictions checkpoints
 
 # Set environment variables
 ENV PYTHONPATH=/app

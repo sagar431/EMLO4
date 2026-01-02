@@ -92,5 +92,4 @@ coverage.xml
 .launchpadlib/
 .dotnet/
 .codeium/
-.devcontainer/
 .windsurf-server/

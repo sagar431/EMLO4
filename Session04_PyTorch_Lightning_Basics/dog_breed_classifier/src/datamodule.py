@@ -1,4 +1,6 @@
 import os
+import subprocess
+import zipfile
 from typing import Optional
 import torch
 import lightning.pytorch as pl
@@ -44,6 +46,8 @@ class DogBreedDataset(Dataset):
         return image, label
 
 class DogBreedDataModule(pl.LightningDataModule):
+    DATASET_URL = "https://www.kaggle.com/api/v1/datasets/download/khushikhushikhushi/dog-breed-image-dataset"
+    
     def __init__(
         self,
         data_dir: str = 'data/dog-breed-dataset',
@@ -71,6 +75,43 @@ class DogBreedDataModule(pl.LightningDataModule):
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
+
+    def prepare_data(self):
+        """Download the dataset from Kaggle if not already present."""
+        dataset_path = os.path.join(self.data_dir, 'dataset')
+        
+        if os.path.exists(dataset_path) and len(os.listdir(dataset_path)) > 0:
+            logger.info(f"Dataset already exists at {dataset_path}")
+            return
+        
+        # Create data directory
+        os.makedirs(self.data_dir, exist_ok=True)
+        zip_path = os.path.join(self.data_dir, 'dog-breed-image-dataset.zip')
+        
+        # Download using curl
+        logger.info("Downloading dog breed dataset from Kaggle...")
+        try:
+            subprocess.run([
+                'curl', '-L', '-o', zip_path,
+                self.DATASET_URL
+            ], check=True)
+            logger.info("Download completed!")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to download dataset: {e}")
+            raise
+        
+        # Extract the zip file
+        logger.info("Extracting dataset...")
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(self.data_dir)
+            logger.info(f"Dataset extracted to {self.data_dir}")
+            
+            # Remove zip file to save space
+            os.remove(zip_path)
+            logger.info("Cleaned up zip file")
+        except Exception as e:
+            logger.error(f"Failed to extract dataset: {e}")
 
     def setup(self, stage: Optional[str] = None):
         if stage == "fit" or stage is None:

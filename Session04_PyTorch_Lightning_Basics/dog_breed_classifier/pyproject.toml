@@ -1,0 +1,13 @@
+[project]
+name = "dog-breed-classifier"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "lightning>=2.6.0",
+    "loguru>=0.7.3",
+    "pandas>=2.3.3",
+    "rich>=14.2.0",
+    "torchvision>=0.24.1",
+]

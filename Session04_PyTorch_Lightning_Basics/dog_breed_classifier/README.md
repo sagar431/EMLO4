@@ -44,7 +44,7 @@ A deep learning model that classifies dog breeds using PyTorch Lightning and Res
 3. Bulldog
 4. Dachshund
 5. German Shepherd
-6. Golden Retririver
+6. Golden Retriever
 7. Labrador Retriever
 8. Poodle
 9. Rottweiler
@@ -143,6 +143,49 @@ docker-compose run infer
 5. **Web Service:**
 ```bash
 docker-compose run -p 8080:8080 web
+```
+
+#### Using `docker run` Directly
+
+```bash
+# Build the base image first
+docker build -f docker/base.Dockerfile -t dog-breed-base:latest .
+
+# Train
+docker run --gpus all \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/checkpoints:/app/checkpoints \
+  dog-breed-base:latest python src/train.py
+
+# Eval
+docker run --gpus all \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/checkpoints:/app/checkpoints \
+  -v $(pwd)/predictions:/app/predictions \
+  dog-breed-base:latest python src/eval.py
+
+# Infer
+docker run --gpus all \
+  -v $(pwd)/src/samples:/app/input \
+  -v $(pwd)/checkpoints:/app/checkpoints \
+  -v $(pwd)/predictions:/app/predictions \
+  dog-breed-base:latest python src/infer.py -input_folder /app/input -output_folder /app/predictions -ckpt checkpoints/dog-breed-epoch=07-val_acc=1.00.ckpt
+```
+
+#### Download Dataset with Kaggle API
+
+```bash
+# Install Kaggle CLI
+pip install kaggle
+
+# Set up Kaggle API credentials (download from kaggle.com/account)
+mkdir -p ~/.kaggle
+cp kaggle.json ~/.kaggle/
+chmod 600 ~/.kaggle/kaggle.json
+
+# Download and extract the dataset
+kaggle datasets download -d khushikhushikhushi/dog-breed-image-dataset -p data/
+unzip data/dog-breed-image-dataset.zip -d data/dog-breed-dataset
 ```
 
 #### Volume Mounts

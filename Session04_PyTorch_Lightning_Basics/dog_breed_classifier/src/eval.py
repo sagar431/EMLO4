@@ -1,9 +1,11 @@
 import json
+import os
 from pathlib import Path
 
 import lightning as L
 from src.train import DogBreedClassifier
 from src.datamodule import DogBreedDataModule
+from src.utils.logging_config import setup_logging
 from loguru import logger
 from rich.console import Console
 from rich.table import Table
