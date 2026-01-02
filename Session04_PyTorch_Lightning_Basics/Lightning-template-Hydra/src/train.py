@@ -29,14 +29,14 @@ def main():
         ),
     ]
 
-    # Use minimal resources for Gitpod environment
-    logger.info("Configuring for CPU-only environment...")
+    # Configure for GPU environment
+    logger.info("Configuring for GPU environment...")
     
-    # Initialize DataModule with minimal worker configuration
+    # Initialize DataModule with GPU-optimized configuration
     logger.info("Initializing DataModule...")
     data_module = CatDogImageDataModule(
-        batch_size=8,  # Reduced batch size
-        num_workers=0,  # No multiprocessing
+        batch_size=16,  # Optimized for GTX 1650 (4GB VRAM)
+        num_workers=2,  # Balanced for your system
         dl_path="data"  # Explicitly set data path
     )
 
@@ -45,24 +45,20 @@ def main():
 
     # Initialize Model
     logger.info("Initializing Model...")
-    model = CatDogClassifier(lr=1e-3)
+    model = CatDogClassifier(lr=1e-4)  # Lower LR for stability
 
-    # Initialize Trainer with CPU configuration
+    # Initialize Trainer with GPU configuration
     logger.info("Setting up Trainer...")
     trainer = Trainer(
         max_epochs=5,
         callbacks=callbacks,
-        accelerator="cpu",  # Force CPU
-        devices=1,
+        accelerator="gpu",  # Use GPU
+        devices=1,          # Use 1 GPU
+        precision=32,       # Use 32-bit for stability (GTX 1650 has limited FP16 support)
+        gradient_clip_val=1.0,  # Prevent exploding gradients
         logger=TensorBoardLogger(save_dir="logs", name="catdog_classification"),
-        deterministic=True,
-        detect_anomaly=True,
         enable_progress_bar=True,
         enable_model_summary=True,
-        # Limit batches for testing
-        limit_train_batches=0.2,  # Use 20% of training data
-        limit_val_batches=0.2,    # Use 20% of validation data
-        limit_test_batches=0.2,   # Use 20% of test data
     )
 
     try:

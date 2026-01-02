@@ -5,7 +5,7 @@ import os
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
-from torchvision.datasets.utils import download_and_extract_archive
+from datasets import load_dataset
 import logging
 
 class CatDogImageDataModule(L.LightningDataModule):
@@ -19,21 +19,46 @@ class CatDogImageDataModule(L.LightningDataModule):
         os.makedirs(self._dl_path, exist_ok=True)
 
     def prepare_data(self):
-        """Download images and prepare images datasets."""
+        """Download images from Hugging Face and prepare datasets."""
         try:
-            if not self.data_path.exists():
-                download_and_extract_archive(
-                    url="https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip",
-                    download_root=self._dl_path,
-                    remove_finished=True
-                )
+            train_path = self.data_path / "train"
+            val_path = self.data_path / "validation"
+            
+            if not train_path.exists() or not val_path.exists():
+                logging.info("Downloading cats_vs_dogs dataset from Hugging Face...")
+                dataset = load_dataset("microsoft/cats_vs_dogs", split="train")
+                
+                # Create directories
+                for split_path in [train_path, val_path]:
+                    (split_path / "cats").mkdir(parents=True, exist_ok=True)
+                    (split_path / "dogs").mkdir(parents=True, exist_ok=True)
+                
+                # Split into train (80%) and validation (20%)
+                dataset = dataset.shuffle(seed=42)
+                split_idx = int(len(dataset) * 0.8)
+                
+                for idx, sample in enumerate(dataset):
+                    image = sample["image"]
+                    label = sample["labels"]  # 0 = cat, 1 = dog
+                    
+                    # Determine split and class folder
+                    split_folder = train_path if idx < split_idx else val_path
+                    class_folder = "cats" if label == 0 else "dogs"
+                    
+                    # Save image
+                    image_path = split_folder / class_folder / f"{idx}.jpg"
+                    if image.mode != "RGB":
+                        image = image.convert("RGB")
+                    image.save(image_path)
+                
+                logging.info(f"Dataset saved to {self.data_path}")
         except Exception as e:
             logging.error(f"Failed to download or extract dataset: {str(e)}")
             raise
 
     @property
     def data_path(self):
-        return self._dl_path.joinpath("cats_and_dogs_filtered")
+        return self._dl_path / "cats_and_dogs_filtered"
 
     @property
     def normalize_transform(self):
@@ -74,7 +99,7 @@ class CatDogImageDataModule(L.LightningDataModule):
                 batch_size=self._batch_size,
                 num_workers=self._num_workers,
                 shuffle=train,
-                pin_memory=False  # Disabled for CPU-only
+                pin_memory=True  # Enabled for GPU - faster data transfer
             )
         except Exception as e:
             logging.error(f"Failed to create dataloader: {str(e)}")

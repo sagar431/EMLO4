@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "black>=25.1.0",
+    "datasets>=4.4.2",
     "lightning[extra]>=2.5.1.post0",
     "loguru>=0.7.3",
     "rich>=13.9.4",
