@@ -63,18 +63,14 @@ Thumbs.db
 *.rar
 *.7z
 
-# Specific to your project
-Session*/*/data/
-Session*/*/logs/
-Session*/*/predictions/
-Session*/*/lightning_logs/
-Session*/*/.venv/
-Session*/*/wandb/
-Session*/*/checkpoints/
-
-# Specific Session04 paths
-Session04_PyTorch_Lightning_Basics/Lightning-template-Hydra/data/
-Session04_PyTorch_Lightning_Basics/Lightning-template-Hydra/logs/catdog_classification/*.ckpt
+# Specific to your project (short folder names: s01, s02, etc.)
+s*/*/data/
+s*/*/logs/
+s*/*/predictions/
+s*/*/lightning_logs/
+s*/*/.venv/
+s*/*/wandb/
+s*/*/checkpoints/
 
 # Distribution / packaging
 .Python

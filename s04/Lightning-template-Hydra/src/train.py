@@ -1,8 +1,13 @@
 import os
+import torch
 import lightning as L
 from lightning.pytorch import Trainer
 from lightning.pytorch.callbacks import RichProgressBar, RichModelSummary, ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
+
+# Enable Tensor Core optimization for better GPU performance
+# Options: 'highest' (most precise), 'high', 'medium' (fastest)
+torch.set_float32_matmul_precision('medium')
 
 from datamodules.catdog_datamodule import CatDogImageDataModule
 from models.catdog_classifier import CatDogClassifier
