@@ -65,7 +65,65 @@ python -m venv .venv
 3. Install dependencies:
 ```bash
 pip install -e .
+# or with uv (recommended)
+uv sync
 ```
+
+## Data Version Control (DVC)
+
+This project uses **DVC** to manage the dataset. The actual data (598MB) is stored on Google Drive, not in Git.
+
+### Quick Start: Pull the Data
+
+```bash
+# Pull all data from Google Drive
+dvc pull
+```
+
+### First-Time Setup (Configure Google Drive)
+
+If you're setting up for the first time, you need to configure your Google Drive credentials:
+
+1. **Create OAuth credentials** at [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+   - Application type: **Desktop App**
+   - Download the client ID and secret
+
+2. **Configure DVC** with your credentials:
+```bash
+dvc remote modify gdrive gdrive_client_id 'YOUR_CLIENT_ID'
+dvc remote modify gdrive gdrive_client_secret 'YOUR_CLIENT_SECRET'
+```
+
+3. **Pull the data**:
+```bash
+dvc pull -r gdrive
+```
+   - A browser window will open for authentication
+   - Authorize access to your Google Drive
+
+### DVC Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `dvc pull` | Download data from remote storage |
+| `dvc push` | Upload data to remote storage |
+| `dvc status` | Check if data is up-to-date |
+| `dvc add data/` | Track new/modified data files |
+| `dvc checkout` | Restore data to match current .dvc files |
+
+### How DVC Works
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    Git Repo     │     │   data.dvc      │     │  Google Drive   │
+│                 │────▶│  (pointer file) │────▶│  (actual data)  │
+│  (code + .dvc)  │     │  md5: abc123... │     │    598 MB       │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+- **Git tracks**: Code, configs, and `.dvc` pointer files
+- **DVC tracks**: Large data files on Google Drive
+- **data.dvc**: Contains hash of your data - when you `dvc pull`, it fetches matching data
 
 ## Training the Model
 
