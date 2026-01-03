@@ -1,0 +1,71 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Data and samples (large files)
+data/
+samples/
+src/samples/
+
+# Checkpoints and models (large files)
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+
+# Logs and outputs
+logs/
+outputs/
+predictions/
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# pytest
+.pytest_cache/
+
+# Lock files (can regenerate)
+uv.lock
+
+# Hydra outputs
+multirun/
+
+# Misc
+.DS_Store
+*.log

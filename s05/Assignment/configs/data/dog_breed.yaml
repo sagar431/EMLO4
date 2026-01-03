@@ -1,0 +1,5 @@
+# Data configuration for Dog Breed dataset
+_target_: src.datamodule.DogBreedDataModule
+data_dir: ${paths.data_dir}/dog-breed-dataset
+batch_size: 32
+num_workers: 4

@@ -1,0 +1,8 @@
+# @package _global_
+
+# Default paths configuration
+root_dir: ${oc.env:PROJECT_ROOT,.}
+data_dir: ${paths.root_dir}/data
+log_dir: ${paths.root_dir}/logs
+checkpoint_dir: ${paths.root_dir}/checkpoints
+output_dir: ${paths.root_dir}/outputs
