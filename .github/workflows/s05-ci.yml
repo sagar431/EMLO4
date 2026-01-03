@@ -64,7 +64,7 @@ jobs:
           UV_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu
         run: |
           . .venv/bin/activate
-          uv pip install -e .
+          uv pip install -e . --index-strategy unsafe-best-match
 
       - name: Run tests with coverage
         run: |
