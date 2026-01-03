@@ -34,6 +34,10 @@ dev = [
     "black>=24.0.0",
 ]
 
+[tool.uv]
+# Ensure compatible wheels are resolved for CI (Linux x86_64)
+required-environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
@@ -68,3 +72,4 @@ exclude_lines = [
     "@hydra.main",
 ]
 fail_under = 70
+

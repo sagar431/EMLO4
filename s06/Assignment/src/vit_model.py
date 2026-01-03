@@ -107,6 +107,8 @@ class ViTClassifier(L.LightningModule):
         if self.train_preds:
             all_preds = torch.cat(self.train_preds)
             all_targets = torch.cat(self.train_targets)
+            # Move confmat to CPU since predictions are on CPU
+            self.train_confmat = self.train_confmat.cpu()
             self.train_confmat.update(all_preds, all_targets)
             self.train_preds = []
             self.train_targets = []
@@ -116,6 +118,8 @@ class ViTClassifier(L.LightningModule):
         if self.test_preds:
             all_preds = torch.cat(self.test_preds)
             all_targets = torch.cat(self.test_targets)
+            # Move confmat to CPU since predictions are on CPU
+            self.test_confmat = self.test_confmat.cpu()
             self.test_confmat.update(all_preds, all_targets)
     
     def get_train_confusion_matrix(self):

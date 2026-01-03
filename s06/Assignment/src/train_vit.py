@@ -55,17 +55,28 @@ def plot_training_curves(csv_path, output_dir):
         return
     
     df = pd.read_csv(metrics_file)
-    
+
     # Plot accuracy
     fig, ax = plt.subplots(figsize=(10, 6))
-    
-    train_acc = df[df['train/acc_epoch'].notna()][['epoch', 'train/acc_epoch']].dropna()
-    val_acc = df[df['val/acc'].notna()][['epoch', 'val/acc']].dropna()
-    
+
+    # Handle both possible column names (with and without _epoch suffix)
+    train_acc_col = 'train/acc_epoch' if 'train/acc_epoch' in df.columns else 'train/acc'
+    val_acc_col = 'val/acc'
+
+    if train_acc_col in df.columns:
+        train_acc = df[df[train_acc_col].notna()][['epoch', train_acc_col]].dropna()
+    else:
+        train_acc = pd.DataFrame()
+
+    if val_acc_col in df.columns:
+        val_acc = df[df[val_acc_col].notna()][['epoch', val_acc_col]].dropna()
+    else:
+        val_acc = pd.DataFrame()
+
     if not train_acc.empty:
-        ax.plot(train_acc['epoch'], train_acc['train/acc_epoch'], 'b-', label='Train Accuracy', marker='o')
+        ax.plot(train_acc['epoch'], train_acc[train_acc_col], 'b-', label='Train Accuracy', marker='o')
     if not val_acc.empty:
-        ax.plot(val_acc['epoch'], val_acc['val/acc'], 'r-', label='Val Accuracy', marker='s')
+        ax.plot(val_acc['epoch'], val_acc[val_acc_col], 'r-', label='Val Accuracy', marker='s')
     
     ax.set_xlabel('Epoch')
     ax.set_ylabel('Accuracy')
@@ -78,14 +89,25 @@ def plot_training_curves(csv_path, output_dir):
     
     # Plot loss
     fig, ax = plt.subplots(figsize=(10, 6))
-    
-    train_loss = df[df['train/loss_epoch'].notna()][['epoch', 'train/loss_epoch']].dropna()
-    val_loss = df[df['val/loss'].notna()][['epoch', 'val/loss']].dropna()
-    
+
+    # Handle both possible column names (with and without _epoch suffix)
+    train_loss_col = 'train/loss_epoch' if 'train/loss_epoch' in df.columns else 'train/loss'
+    val_loss_col = 'val/loss'
+
+    if train_loss_col in df.columns:
+        train_loss = df[df[train_loss_col].notna()][['epoch', train_loss_col]].dropna()
+    else:
+        train_loss = pd.DataFrame()
+
+    if val_loss_col in df.columns:
+        val_loss = df[df[val_loss_col].notna()][['epoch', val_loss_col]].dropna()
+    else:
+        val_loss = pd.DataFrame()
+
     if not train_loss.empty:
-        ax.plot(train_loss['epoch'], train_loss['train/loss_epoch'], 'b-', label='Train Loss', marker='o')
+        ax.plot(train_loss['epoch'], train_loss[train_loss_col], 'b-', label='Train Loss', marker='o')
     if not val_loss.empty:
-        ax.plot(val_loss['epoch'], val_loss['val/loss'], 'r-', label='Val Loss', marker='s')
+        ax.plot(val_loss['epoch'], val_loss[val_loss_col], 'r-', label='Val Loss', marker='s')
     
     ax.set_xlabel('Epoch')
     ax.set_ylabel('Loss')
