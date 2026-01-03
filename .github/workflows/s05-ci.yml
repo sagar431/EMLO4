@@ -3,12 +3,8 @@ name: S05 Lightning Template CI
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 's05/Lightning-template-Hydra-ci/**'
   pull_request:
     branches: [ "main" ]
-    paths:
-      - 's05/Lightning-template-Hydra-ci/**'
   workflow_dispatch:  # Allow manual trigger
 
 env:
