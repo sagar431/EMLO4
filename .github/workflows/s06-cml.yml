@@ -66,7 +66,14 @@ jobs:
         env:
           GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
         run: |
-          dvc pull
+          # Retry dvc pull up to 3 times
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            dvc pull && break || {
+              echo "Attempt $i failed, waiting 30s before retry..."
+              sleep 30
+            }
+          done
 
       - name: Train model
         run: |
