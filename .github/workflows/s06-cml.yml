@@ -1,0 +1,133 @@
+name: Train and Report with CML
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 's06/Lightning-Hydra-DVC/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 's06/Lightning-Hydra-DVC/**'
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  WORKING_DIR: s06/Lightning-Hydra-DVC
+
+jobs:
+  train-and-report:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      # Clean up disk space
+      - name: Free Disk Space
+        working-directory: /
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          df -h
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Install dependencies
+        env:
+          UV_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu
+        run: |
+          uv sync
+          uv pip install pandas matplotlib
+
+      - name: Pull DVC data
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          dvc pull
+
+      - name: Train model
+        run: |
+          uv run dvc repro
+
+      - name: Generate plots and create CML report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Find the latest metrics.csv file
+          METRICS_FILE=$(find logs/train/runs -name "metrics.csv" -type f | sort -r | head -n 1)
+          echo "Found metrics file: $METRICS_FILE"
+          
+          # Generate plots using the Python script
+          uv run python scripts/generate_plots.py "$METRICS_FILE"
+          
+          # Create the markdown report
+          echo "# 🎯 Training Report" >> report.md
+          echo "" >> report.md
+          echo "## 📊 Training Metrics" >> report.md
+          echo "" >> report.md
+          
+          # Add accuracy plot
+          echo "### Training Accuracy" >> report.md
+          cml publish train_acc_plot.png --md >> report.md
+          echo "" >> report.md
+          
+          # Add loss plot
+          echo "### Training Loss" >> report.md
+          cml publish train_loss_plot.png --md >> report.md
+          echo "" >> report.md
+          
+          # Add validation plots if they exist
+          if [ -f "val_acc_plot.png" ]; then
+            echo "### Validation Accuracy" >> report.md
+            cml publish val_acc_plot.png --md >> report.md
+            echo "" >> report.md
+          fi
+          
+          if [ -f "val_loss_plot.png" ]; then
+            echo "### Validation Loss" >> report.md
+            cml publish val_loss_plot.png --md >> report.md
+            echo "" >> report.md
+          fi
+          
+          # Add test metrics table
+          echo "## 🧪 Test Metrics" >> report.md
+          echo "" >> report.md
+          uv run python scripts/generate_test_metrics.py "$METRICS_FILE" >> report.md
+          echo "" >> report.md
+          
+          # Add run info
+          echo "## ℹ️ Run Information" >> report.md
+          echo "" >> report.md
+          echo "| Parameter | Value |" >> report.md
+          echo "|-----------|-------|" >> report.md
+          echo "| Commit | ${{ github.sha }} |" >> report.md
+          echo "| Branch | ${{ github.ref_name }} |" >> report.md
+          echo "| Runner | ${{ runner.os }} |" >> report.md
+          echo "| Triggered by | ${{ github.actor }} |" >> report.md
+          echo "" >> report.md
+          
+          # Post the report as a comment
+          cml comment create report.md

@@ -1,0 +1,44 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: python src/train.py experiment=catdog_ex +trainer.log_every_n_steps=5
+    deps:
+    - path: configs/data/catdog.yaml
+      hash: md5
+      md5: b2dc3844e65a07e70b2ce757f993e25c
+      size: 167
+    - path: configs/experiment/catdog_ex.yaml
+      hash: md5
+      md5: e57b4f1549208b1580afa2fdba3bf3e0
+      size: 768
+    - path: configs/model/timm_classify.yaml
+      hash: md5
+      md5: 3cad4bf86100d309d0f7221f87228c12
+      size: 238
+    - path: configs/train.yaml
+      hash: md5
+      md5: 5713647ef8f324e4422052fa2b6688fb
+      size: 1282
+    - path: data
+      hash: md5
+      md5: a42fbba7f80c617fb165458aabbd6066.dir
+      size: 577845215
+      nfiles: 23410
+    - path: src/datamodules/catdog_datamodule.py
+      hash: md5
+      md5: 1c083163b875c759c5a7826e04b4af99
+      size: 4796
+    - path: src/models/timm_classifier.py
+      hash: md5
+      md5: 343df75ba7691bf757a96ff758785e8a
+      size: 2616
+    - path: src/train.py
+      hash: md5
+      md5: 889fe69a5df01263c858dab1727baebd
+      size: 3495
+    outs:
+    - path: logs
+      hash: md5
+      md5: 3ca0bf3c19b062b051fbf8f8439b42b9.dir
+      size: 268564005
+      nfiles: 12

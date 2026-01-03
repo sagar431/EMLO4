@@ -1,0 +1,15 @@
+stages:
+  train:
+    cmd: python src/train.py experiment=catdog_ex +trainer.log_every_n_steps=5
+    deps:
+      - data
+      - configs/experiment/catdog_ex.yaml
+      - configs/train.yaml
+      - configs/model/timm_classify.yaml
+      - configs/data/catdog.yaml
+      - src/train.py
+      - src/models/timm_classifier.py
+      - src/datamodules/catdog_datamodule.py
+    outs:
+      - logs:
+          cache: false
