@@ -38,18 +38,16 @@ def test_catdog_datamodule(cfg_datamodule: DictConfig):
     assert datamodule.val_dataset
     assert datamodule.test_dataset
 
-    # Calculate expected lengths based on splits
-    # Assuming the default dataset has 2000 images in the 'train' folder
-    # as per the cats_and_dogs_filtered dataset structure.
-    # The dataset is split into train/val/test after loading the initial 'train' set.
-    total_images_in_original_train_set = 2000
-    train_len = int(cfg_datamodule.splits[0] * total_images_in_original_train_set)
-    val_len = int(cfg_datamodule.splits[1] * total_images_in_original_train_set)
-    test_len = total_images_in_original_train_set - train_len - val_len
+    # Calculate expected lengths based on actual dataset size (not hardcoded!)
+    # The Hugging Face microsoft/cats_vs_dogs dataset has ~18,727 images
+    total_images = len(datamodule._dataset)
+    train_len = int(cfg_datamodule.splits[0] * total_images)
+    val_len = int(cfg_datamodule.splits[1] * total_images)
+    test_len = total_images - train_len - val_len
 
-    assert len(datamodule.train_dataset) == train_len, "Train dataset length mismatch."
-    assert len(datamodule.val_dataset) == val_len, "Validation dataset length mismatch."
-    assert len(datamodule.test_dataset) == test_len, "Test dataset length mismatch."
+    assert len(datamodule.train_dataset) == train_len, f"Train dataset length mismatch. Expected {train_len}, got {len(datamodule.train_dataset)}"
+    assert len(datamodule.val_dataset) == val_len, f"Validation dataset length mismatch. Expected {val_len}, got {len(datamodule.val_dataset)}"
+    assert len(datamodule.test_dataset) == test_len, f"Test dataset length mismatch. Expected {test_len}, got {len(datamodule.test_dataset)}"
 
     # Check dataloader creation
     assert datamodule.train_dataloader()

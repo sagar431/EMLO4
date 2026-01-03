@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Union, Tuple
 import os
+import logging
 
 import lightning as L
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
-from torchvision.datasets.utils import download_and_extract_archive
+from datasets import load_dataset
 
 
 class CatDogImageDataModule(L.LightningDataModule):
@@ -25,16 +26,47 @@ class CatDogImageDataModule(L.LightningDataModule):
         self._splits = splits
         self._pin_memory = pin_memory
         self._dataset = None
+        
+        # Ensure the data directory exists
+        os.makedirs(self._data_dir, exist_ok=True)
 
     def prepare_data(self):
-        """Download images if not already downloaded and extracted."""
-        dataset_path = self.data_path / "cats_and_dogs_filtered"
-        if not dataset_path.exists():
-            download_and_extract_archive(
-                url="https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip",
-                download_root=self._data_dir,
-                remove_finished=True,
-            )
+        """Download images from Hugging Face and prepare datasets."""
+        try:
+            train_path = self.data_path / "cats_and_dogs_filtered" / "train"
+            val_path = self.data_path / "cats_and_dogs_filtered" / "validation"
+            
+            if not train_path.exists() or not val_path.exists():
+                logging.info("Downloading cats_vs_dogs dataset from Hugging Face...")
+                dataset = load_dataset("microsoft/cats_vs_dogs", split="train")
+                
+                # Create directories
+                for split_path in [train_path, val_path]:
+                    (split_path / "cats").mkdir(parents=True, exist_ok=True)
+                    (split_path / "dogs").mkdir(parents=True, exist_ok=True)
+                
+                # Split into train (80%) and validation (20%)
+                dataset = dataset.shuffle(seed=42)
+                split_idx = int(len(dataset) * 0.8)
+                
+                for idx, sample in enumerate(dataset):
+                    image = sample["image"]
+                    label = sample["labels"]  # 0 = cat, 1 = dog
+                    
+                    # Determine split and class folder
+                    split_folder = train_path if idx < split_idx else val_path
+                    class_folder = "cats" if label == 0 else "dogs"
+                    
+                    # Save image
+                    image_path = split_folder / class_folder / f"{idx}.jpg"
+                    if image.mode != "RGB":
+                        image = image.convert("RGB")
+                    image.save(image_path)
+                
+                logging.info(f"Dataset saved to {self.data_path}")
+        except Exception as e:
+            logging.error(f"Failed to download or extract dataset: {str(e)}")
+            raise
 
     @property
     def data_path(self):

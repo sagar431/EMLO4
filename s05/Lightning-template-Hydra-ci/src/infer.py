@@ -1,5 +1,10 @@
 import argparse
+import sys
 from pathlib import Path
+
+# Add project root to sys.path
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
 
 import torch
 import torch.nn.functional as F
@@ -7,8 +12,8 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from torchvision import transforms
 
-from models.timm_classifier import CatDogClassifier
-from utils.logging_utils import setup_logger, task_wrapper, get_rich_progress
+from src.models.timm_classifier import TimmClassifier
+from src.utils.logging_utils import setup_logger, task_wrapper, get_rich_progress
 
 
 @task_wrapper
@@ -51,7 +56,7 @@ def save_prediction_image(image, predicted_label, confidence, output_path):
 
 @task_wrapper
 def main(args):
-    model = CatDogClassifier.load_from_checkpoint(args.ckpt_path)
+    model = TimmClassifier.load_from_checkpoint(args.ckpt_path)
     model.eval()
 
     input_folder = Path(args.input_folder)

@@ -41,7 +41,7 @@ logs/
 *.pth
 
 # Dataset
-data/
+/data/
 
 # Predictions
 
