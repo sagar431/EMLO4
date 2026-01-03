@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Data (tracked by DVC)
+/data/
+
+# Outputs (generated during training)
+/outputs/
+logs/
+lightning_logs/
+
+# Checkpoints
+*.ckpt
+*.pt
+*.pth
+
+# Lock files
+uv.lock
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# pytest
+.pytest_cache/
+
+# Hydra outputs
+multirun/
+
+# Misc
+.DS_Store
+*.log
+
+# DVC local config (contains credentials)
+.dvc/config.local
+.dvc/tmp/
+
+# Keep .dvc tracked
+!.dvc/

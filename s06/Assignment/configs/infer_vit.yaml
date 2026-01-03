@@ -1,0 +1,19 @@
+# Inference configuration for ViT CatDog Classifier
+defaults:
+  - _self_
+
+# Random seed
+seed: 42
+
+# Data directory
+data_dir: data/PetImages
+
+# Number of images to infer
+num_images: 10
+
+# Checkpoint path
+checkpoint_path: outputs/checkpoints/last.ckpt
+model_dir: outputs
+
+# Output directory
+output_dir: outputs

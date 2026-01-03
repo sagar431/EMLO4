@@ -1,0 +1,23 @@
+# Inference configuration
+defaults:
+  - _self_
+  - paths: default
+  - model: dog_breed
+
+# Checkpoint path
+checkpoint_path: ${paths.checkpoint_dir}/best_model.ckpt
+
+# Input/Output settings
+input_folder: ${paths.root_dir}/samples
+output_folder: ${paths.output_dir}/predictions
+
+# Inference settings
+max_images: 10
+image_extensions:
+  - .jpg
+  - .jpeg
+  - .png
+
+# Visualization
+save_visualization: true
+visualization_cols: 5

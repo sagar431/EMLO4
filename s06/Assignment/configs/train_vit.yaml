@@ -1,0 +1,35 @@
+# Training configuration for ViT CatDog Classifier
+defaults:
+  - _self_
+
+# Random seed
+seed: 42
+
+# Output directory
+output_dir: outputs
+
+# CometML settings
+comet_project: catdog-vit
+experiment_name: vit-training
+
+# Data configuration
+data:
+  data_dir: data/PetImages
+  batch_size: 32
+  num_workers: 4
+  image_size: 224
+
+# Model configuration
+model:
+  model_name: vit_tiny_patch16_224
+  num_classes: 2
+  learning_rate: 0.0001
+  pretrained: true
+
+# Trainer configuration
+trainer:
+  max_epochs: 5
+  accelerator: auto
+  devices: 1
+  log_every_n_steps: 10
+  patience: 3

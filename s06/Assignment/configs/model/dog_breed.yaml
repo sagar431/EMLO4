@@ -1,0 +1,5 @@
+# Model configuration for Dog Breed Classifier
+_target_: src.train.DogBreedClassifier
+num_classes: 10
+learning_rate: 0.001
+class_mapping: null

@@ -1,0 +1,150 @@
+name: S06 CatDog ViT DVC Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 's06/Assignment/**'
+      - '.github/workflows/s06-assignment-dvc.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 's06/Assignment/**'
+  workflow_dispatch:
+
+env:
+  WORKING_DIR: s06/Assignment
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  train-and-report:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Free Disk Space
+        working-directory: /
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          df -h
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Install dependencies
+        env:
+          UV_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu
+        run: |
+          uv sync
+
+      - name: Pull DVC data
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          # Retry dvc pull up to 3 times
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            dvc pull && break || {
+              echo "Attempt $i failed, waiting 30s before retry..."
+              sleep 30
+            }
+          done
+
+      - name: Run DVC Pipeline (Train + Infer)
+        env:
+          COMET_API_KEY: ${{ secrets.COMET_API_KEY }}
+        run: |
+          uv run dvc repro
+
+      - name: Create CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "# 🐱🐕 CatDog ViT Training Report" >> report.md
+          echo "" >> report.md
+          
+          # Add metrics
+          echo "## 📊 Training Metrics" >> report.md
+          echo "" >> report.md
+          if [ -f outputs/metrics.json ]; then
+            echo '```json' >> report.md
+            cat outputs/metrics.json >> report.md
+            echo '```' >> report.md
+          fi
+          echo "" >> report.md
+          
+          # Add accuracy plot
+          echo "## 📈 Training & Validation Accuracy" >> report.md
+          if [ -f outputs/plots/accuracy_plot.png ]; then
+            cml publish outputs/plots/accuracy_plot.png --md >> report.md
+          fi
+          echo "" >> report.md
+          
+          # Add loss plot
+          echo "## 📉 Training & Validation Loss" >> report.md
+          if [ -f outputs/plots/loss_plot.png ]; then
+            cml publish outputs/plots/loss_plot.png --md >> report.md
+          fi
+          echo "" >> report.md
+          
+          # Add confusion matrices
+          echo "## 🔢 Confusion Matrices" >> report.md
+          echo "" >> report.md
+          echo "### Training Set" >> report.md
+          if [ -f outputs/plots/train_confusion_matrix.png ]; then
+            cml publish outputs/plots/train_confusion_matrix.png --md >> report.md
+          fi
+          echo "" >> report.md
+          
+          echo "### Test Set" >> report.md
+          if [ -f outputs/plots/test_confusion_matrix.png ]; then
+            cml publish outputs/plots/test_confusion_matrix.png --md >> report.md
+          fi
+          echo "" >> report.md
+          
+          # Add inference results preview
+          echo "## 🔍 Inference Results (10 Test Images)" >> report.md
+          echo "" >> report.md
+          if [ -f outputs/results.md ]; then
+            # Show first few prediction images
+            for i in 1 2 3 4 5; do
+              if [ -f outputs/predictions/pred_$i.png ]; then
+                cml publish outputs/predictions/pred_$i.png --md >> report.md
+              fi
+            done
+          fi
+          echo "" >> report.md
+          
+          # Add link to full results
+          echo "📄 See [outputs/results.md](outputs/results.md) for full inference results" >> report.md
+          
+          # Post the report
+          cml comment create report.md

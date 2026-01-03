@@ -1,0 +1,32 @@
+stages:
+  train:
+    cmd: python src/train_vit.py
+    deps:
+      - data
+      - src/train_vit.py
+      - src/vit_model.py
+      - src/catdog_datamodule.py
+      - configs/train_vit.yaml
+    outs:
+      - outputs/checkpoints:
+          cache: false
+      - outputs/plots:
+          cache: false
+      - outputs/metrics.json:
+          cache: false
+    metrics:
+      - outputs/metrics.json:
+          cache: false
+
+  infer:
+    cmd: python src/infer_vit.py
+    deps:
+      - data
+      - src/infer_vit.py
+      - outputs/checkpoints
+      - configs/infer_vit.yaml
+    outs:
+      - outputs/predictions:
+          cache: false
+      - outputs/results.md:
+          cache: false

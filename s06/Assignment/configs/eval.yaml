@@ -1,0 +1,18 @@
+# Evaluation configuration
+defaults:
+  - _self_
+  - paths: default
+  - model: dog_breed
+  - data: dog_breed
+
+# Checkpoint path for evaluation
+checkpoint_path: ${paths.checkpoint_dir}/best_model.ckpt
+
+# Trainer settings
+trainer:
+  accelerator: auto
+  devices: 1
+
+# Output settings
+output_dir: ${paths.output_dir}/eval
+metrics_file: ${output_dir}/eval_metrics.json
