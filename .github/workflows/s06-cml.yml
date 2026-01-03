@@ -5,10 +5,12 @@ on:
     branches: [ "main" ]
     paths:
       - 's06/Lightning-Hydra-DVC/**'
+      - '.github/workflows/s06-cml.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 's06/Lightning-Hydra-DVC/**'
+      - '.github/workflows/s06-cml.yml'
   workflow_dispatch:  # Allow manual trigger
 
 env:
