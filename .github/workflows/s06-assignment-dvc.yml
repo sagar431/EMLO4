@@ -60,10 +60,11 @@ jobs:
         uses: iterative/setup-cml@v2
 
       - name: Install dependencies
-        env:
-          UV_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu
         run: |
-          uv sync
+          # Install PyTorch CPU version first via pip to avoid index conflicts
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          # Then install the rest with uv (excluding torch/torchvision)
+          uv sync --no-install-package torch --no-install-package torchvision
 
       - name: Pull DVC data
         env:
