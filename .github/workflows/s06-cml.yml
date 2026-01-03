@@ -16,6 +16,11 @@ on:
 env:
   WORKING_DIR: s06/Lightning-Hydra-DVC
 
+# Cancel previous runs when a new push happens
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   train-and-report:
     runs-on: ubuntu-latest
