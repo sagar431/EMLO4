@@ -111,29 +111,36 @@ def main(cfg: DictConfig):
         logger=loggers,
     )
 
+    # Track metric for Optuna
+    metric_value = None
+    optimized_metric = cfg.get("optimized_metric", "val/acc")
+
     # Train the model
     if cfg.get("train"):
         train(cfg, trainer, model, datamodule)
+        # Capture the metric right after training (before it gets cleared)
+        metric_value = trainer.callback_metrics.get(optimized_metric)
+        if metric_value is not None:
+            metric_value = float(metric_value)
 
     # Test the model
     if cfg.get("test"):
         test(cfg, trainer, model, datamodule)
 
     # Return metric for Optuna hyperparameter optimization
-    optimized_metric = cfg.get("optimized_metric", "val/acc")
-    metric_value = trainer.callback_metrics.get(optimized_metric)
-    
     if metric_value is not None:
         log.info(f"Optimized metric ({optimized_metric}): {metric_value}")
-        return float(metric_value)
+        return metric_value
     
-    # Fallback to val/acc if available
+    # Fallback: try to get from current callback_metrics
+    if optimized_metric in trainer.callback_metrics:
+        return float(trainer.callback_metrics[optimized_metric])
     if "val/acc" in trainer.callback_metrics:
         return float(trainer.callback_metrics["val/acc"])
     
-    return None
+    log.warning(f"Could not find metric '{optimized_metric}' to return for Optuna")
+    return 0.0  # Return 0.0 instead of None to avoid Optuna error
 
 
 if __name__ == "__main__":
     main()
-
