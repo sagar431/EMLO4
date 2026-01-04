@@ -1,0 +1,11 @@
+# Aim logger for experiment tracking
+# https://aimstack.readthedocs.io/en/latest/using/pytorch_lightning.html
+
+aim:
+  _target_: aim.pytorch_lightning.AimLogger
+  repo: "${paths.output_dir}/aim"
+  experiment: "${experiment_name}"
+  train_metric_prefix: "train/"
+  val_metric_prefix: "val/"
+  test_metric_prefix: "test/"
+  log_system_params: true
