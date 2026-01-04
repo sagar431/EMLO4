@@ -1,0 +1,14 @@
+# MLflow logger for experiment tracking
+# https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.loggers.mlflow.html
+
+mlflow:
+  _target_: lightning.pytorch.loggers.mlflow.MLFlowLogger
+  experiment_name: "${experiment_name}"
+  tracking_uri: "file:${paths.log_dir}/mlruns"
+  tags:
+    project: "catdog-vit"
+  save_dir: null
+  log_model: false
+  prefix: ""
+  artifact_location: null
+  run_name: null

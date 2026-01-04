@@ -1,0 +1,22 @@
+# Data (tracked by DVC)
+data/
+
+# Logs and outputs
+logs/
+outputs/
+*.db
+
+# Virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Lock file
+uv.lock
+
+# Aim
+.aim/
+
+# But track .dvc folder
+!.dvc
+

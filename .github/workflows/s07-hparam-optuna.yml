@@ -1,0 +1,116 @@
+name: S07 ConvNeXt Hyperparameter Optimization
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 's07/z_assingment/**'
+      - '.github/workflows/s07-hparam-optuna.yml'
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 's07/z_assingment/**'
+  workflow_dispatch:
+
+env:
+  WORKING_DIR: s07/z_assingment
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hparam-optimization:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Free Disk Space
+        working-directory: /
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          df -h
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Install dependencies
+        run: |
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          uv sync --no-install-package torch --no-install-package torchvision
+
+      - name: Pull DVC data
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            dvc pull && break || {
+              echo "Attempt $i failed, waiting 30s before retry..."
+              sleep 30
+            }
+          done
+
+      - name: Run Hyperparameter Optimization (10 trials)
+        run: |
+          uv run python src/train.py -m hparams_search=convnext_optuna 2>&1 | tee optuna_output.log
+
+      - name: Generate Report
+        run: |
+          uv run python scripts/generate_hparam_report.py
+
+      - name: Create CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "# 🎯 S07 ConvNeXt Hyperparameter Optimization Results" >> report.md
+          echo "" >> report.md
+          echo "## 🔬 Optuna TPE Search (10 Trials)" >> report.md
+          echo "" >> report.md
+          
+          # Add the generated hparam report
+          if [ -f outputs/hparam_report.md ]; then
+            cat outputs/hparam_report.md >> report.md
+          fi
+          echo "" >> report.md
+          
+          # Add combined metrics plot
+          echo "## 📈 Combined Metrics Plot" >> report.md
+          if [ -f outputs/combined_metrics.png ]; then
+            cml publish outputs/combined_metrics.png --md >> report.md
+          fi
+          echo "" >> report.md
+          
+          # Add Optuna best params from log
+          echo "## 🏆 Optuna Best Parameters" >> report.md
+          echo '```' >> report.md
+          grep -A 20 "Best parameters" optuna_output.log 2>/dev/null || echo "See report above"
+          echo '```' >> report.md
+          echo "" >> report.md
+          
+          # Post the report as a comment
+          cml comment create report.md

@@ -1,0 +1,71 @@
+# @package _global_
+
+# ConvNeXt Hyperparameter Optimization with Optuna
+# 
+# Run locally:
+#   python src/train.py -m hparams_search=convnext_optuna trainer.max_epochs=2
+#
+# GitHub Actions will run this and post results as a comment
+
+defaults:
+  - override /hydra/sweeper: optuna
+
+# Override model to use ConvNeXt (small and efficient)
+model:
+  base_model: "convnext_atto"  # Smallest ConvNeXt variant
+  pretrained: True
+  num_classes: 2
+
+# Experiment tracking
+experiment_name: "convnext-hparam-search"
+
+# Training settings
+trainer:
+  max_epochs: 2
+  log_every_n_steps: 10
+
+# Data settings
+data:
+  batch_size: 32
+  num_workers: 4
+
+# Choose metric to optimize
+optimized_metric: "val/acc"
+
+# Optuna configuration
+hydra:
+  mode: "MULTIRUN"
+
+  sweeper:
+    _target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
+
+    # Persist results to SQLite for tracking
+    storage: "sqlite:///optuna_results.db"
+    study_name: "convnext_hparam_search"
+
+    n_jobs: 1
+    direction: maximize
+    n_trials: 10  # Run 10 experiments
+
+    # TPE Sampler (Bayesian optimization)
+    sampler:
+      _target_: optuna.samplers.TPESampler
+      seed: 42
+      n_startup_trials: 3
+
+    # Hyperparameter search space for ConvNeXt
+    params:
+      # Learning rate (log scale)
+      model.lr: tag(log, interval(1e-5, 1e-2))
+      
+      # Weight decay
+      model.weight_decay: tag(log, interval(1e-6, 1e-3))
+      
+      # Batch size options
+      data.batch_size: choice(16, 32, 64)
+      
+      # Optimizer patience for LR scheduler
+      model.patience: choice(3, 5, 10)
+      
+      # Model variants (all small ConvNeXt)
+      model.base_model: choice(convnext_atto, convnext_femto, convnext_pico)

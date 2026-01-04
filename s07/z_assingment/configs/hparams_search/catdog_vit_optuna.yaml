@@ -1,0 +1,56 @@
+# @package _global_
+
+# Optuna Hyperparameter Search for CatDog ViT
+# 
+# Run with:
+# python src/train.py -m hparams_search=catdog_vit_optuna trainer.max_epochs=3
+
+defaults:
+  - override /hydra/sweeper: optuna
+
+# Override model to use ViT (not ResNet)
+model:
+  base_model: "vit_tiny_patch16_224"
+  pretrained: False
+
+# Choose metric to optimize (must match what's logged in training)
+optimized_metric: "val/acc"
+
+# Optuna configuration
+hydra:
+  mode: "MULTIRUN"  # Enable multirun mode
+
+  sweeper:
+    _target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
+
+    # Storage URL to persist results (null = in-memory, or use 'sqlite:///optuna.db')
+    storage: null
+
+    # Study name for tracking
+    study_name: "catdog_vit_hparam_search"
+
+    # Number of parallel workers (1 for single GPU)
+    n_jobs: 1
+
+    # 'minimize' or 'maximize' the objective
+    direction: maximize
+
+    # Total number of trials to run
+    n_trials: 10
+
+    # Sampler configuration (TPE = Bayesian optimization)
+    sampler:
+      _target_: optuna.samplers.TPESampler
+      seed: 42
+      n_startup_trials: 3  # Random trials before Bayesian optimization kicks in
+
+    # Define hyperparameter search space
+    params:
+      # Learning rate: log-uniform from 1e-5 to 1e-2
+      model.lr: interval(0.00001, 0.01)
+      
+      # ViT architecture parameters (use + prefix to add new params)
+      +model.embed_dim: choice(192, 384)  # Must be divisible by num_heads
+      +model.depth: choice(6, 12)
+      +model.num_heads: choice(3, 6)  # Must divide embed_dim evenly
+

@@ -1,0 +1,62 @@
+# @package _global_
+
+# ViT Architecture Sweep Experiment
+# 
+# Example usage:
+# python src/train.py experiment=vit_sweep
+# python src/train.py -m experiment=vit_sweep model.embed_dim=128,192,256
+# python src/train.py -m experiment=vit_sweep model.depth=6,8,12 model.num_heads=3,6
+
+defaults:
+  - override /data: catdog
+  - override /model: timm_classify
+  - override /callbacks: default
+  - override /logger: default
+  - override /trainer: default
+
+# Experiment name for tracking
+experiment_name: "vit-sweep"
+
+seed: 42
+
+data:
+  batch_size: 64
+  num_workers: 4
+  pin_memory: True
+
+# ViT model configuration with sweepable parameters
+# Using vit_tiny_patch16_224.augreg_in21k which supports architecture kwargs
+model:
+  base_model: "vit_tiny_patch16_224"
+  pretrained: False                  # Train from scratch for architecture search
+  num_classes: 2
+  lr: 1e-4
+  # ViT architecture parameters (can be swept with --multirun)
+  # Note: embed_dim must be divisible by num_heads
+  embed_dim: 192     # Sweep: 192, 384, 576 (divisible by 3)
+  depth: 12          # Sweep: 6, 8, 12
+  num_heads: 3       # Keep fixed, or sweep: 3, 6
+
+trainer:
+  min_epochs: 1
+  max_epochs: 5
+
+callbacks:
+  model_checkpoint:
+    monitor: "val/acc"
+    mode: "max"
+    save_top_k: 1
+    save_last: True
+
+  early_stopping:
+    monitor: "val/acc"
+    patience: 5
+    mode: "max"
+
+# Override logger experiment name
+logger:
+  aim:
+    experiment: "${experiment_name}"
+  mlflow:
+    experiment_name: "${experiment_name}"
+
