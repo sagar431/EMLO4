@@ -20,15 +20,20 @@ model:
 # Experiment tracking
 experiment_name: "convnext-fashionmnist-hparam-search"
 
-# Training settings
+# Training settings (optimized for CPU in CI)
 trainer:
   max_epochs: 2
   log_every_n_steps: 10
+  accelerator: auto
+  # Limit batches for faster CI runs (remove for full training)
+  limit_train_batches: 100  # ~6400 samples
+  limit_val_batches: 20     # ~1280 samples
 
-# Data settings
+# Data settings (smaller batch for CPU)
 data:
-  batch_size: 32
-  num_workers: 4
+  batch_size: 64
+  num_workers: 2
+  image_size: 32  # Much faster than 224!
 
 # Choose metric to optimize
 optimized_metric: "val/acc"
