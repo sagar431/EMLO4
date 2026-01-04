@@ -2,6 +2,39 @@
 
 This assignment demonstrates automated hyperparameter optimization using **Optuna** TPE (Tree-structured Parzen Estimator) with **ConvNeXt** models, integrated into a **GitHub Actions** CI/CD pipeline.
 
+## 🏆 CML Results
+
+**Latest Optuna Hyperparameter Search Results:**
+
+👉 [View Full CML Report](https://github.com/sagar431/EMLO4/commit/7041abf69aa96a58e4bd4bc62b237783e405354d#commitcomment-173861593)
+
+### 📊 Results Table (10 Trials)
+
+|   Run | Test Acc   |            lr |   weight_decay |   batch_size |   patience | base_model     |
+|------:|:-----------|--------------:|---------------:|-------------:|-----------:|:---------------|
+|     8 | **0.8626** |   0.00107407  |    0.000991505 |          128 |          3 | convnext_pico  |
+|     1 | 0.8530     |   0.000132929 |    0.000711448 |           32 |         10 | convnext_femto |
+|     3 | 0.8517     |   7.52374e-05 |    1.25628e-05 |           64 |          5 | convnext_atto  |
+|     7 | 0.8514     |   5.11319e-05 |    5.24654e-05 |           64 |         10 | convnext_atto  |
+|     4 | 0.8496     |   1.33928e-05 |    0.000628906 |          128 |         10 | convnext_pico  |
+|     6 | 0.8490     |   0.000256943 |    6.68862e-05 |           32 |         10 | convnext_femto |
+
+### 🏆 Best Configuration
+
+**Best Test Accuracy: 86.26%**
+
+```yaml
+lr: 0.00107
+weight_decay: 0.000991
+batch_size: 128
+patience: 3
+base_model: convnext_pico
+```
+
+### 📈 Combined Metrics Plot
+
+![Combined Metrics](https://asset.cml.dev/50ab763b66440c2582da685543825dbc85255381?cml=png&cache-bypass=e25f6afc-c9fa-4d28-a3d4-cf9c12906d34)
+
 ## 📋 Assignment Requirements
 
 | Requirement | Status |
