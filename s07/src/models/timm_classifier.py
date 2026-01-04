@@ -17,13 +17,14 @@ class TimmClassifier(L.LightningModule):
         factor: float = 0.1,
         patience: int = 10,
         min_lr: float = 1e-6,
+        **kwargs,
     ):
         super().__init__()
         self.save_hyperparameters()
 
         # Load pre-trained model
         self.model = timm.create_model(
-            base_model, pretrained=pretrained, num_classes=num_classes
+            base_model, pretrained=pretrained, num_classes=num_classes, **kwargs
         )
 
         # Multi-class accuracy
