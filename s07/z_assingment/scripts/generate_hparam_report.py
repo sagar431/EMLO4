@@ -11,7 +11,7 @@ import glob
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 
 def find_multirun_dirs(base_dir: str = "logs/train/multiruns") -> list:
