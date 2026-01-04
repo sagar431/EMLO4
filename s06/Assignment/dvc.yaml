@@ -12,8 +12,6 @@ stages:
           cache: false
       - outputs/plots:
           cache: false
-      - outputs/metrics.json:
-          cache: false
     metrics:
       - outputs/metrics.json:
           cache: false
