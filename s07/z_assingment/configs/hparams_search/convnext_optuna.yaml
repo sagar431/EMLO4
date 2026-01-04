@@ -1,6 +1,6 @@
 # @package _global_
 
-# ConvNeXt Hyperparameter Optimization with Optuna
+# ConvNeXt Hyperparameter Optimization with Optuna on Fashion MNIST
 # 
 # Run locally:
 #   python src/train.py -m hparams_search=convnext_optuna trainer.max_epochs=2
@@ -9,15 +9,16 @@
 
 defaults:
   - override /hydra/sweeper: optuna
+  - override /data: fashionmnist
 
 # Override model to use ConvNeXt (small and efficient)
 model:
   base_model: "convnext_atto"  # Smallest ConvNeXt variant
   pretrained: True
-  num_classes: 2
+  num_classes: 10  # Fashion MNIST has 10 classes
 
 # Experiment tracking
-experiment_name: "convnext-hparam-search"
+experiment_name: "convnext-fashionmnist-hparam-search"
 
 # Training settings
 trainer:
@@ -40,8 +41,8 @@ hydra:
     _target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
 
     # Persist results to SQLite for tracking
-    storage: "sqlite:///optuna_results.db"
-    study_name: "convnext_hparam_search"
+    storage: null
+    study_name: "convnext_fashionmnist_hparam_search"
 
     n_jobs: 1
     direction: maximize
@@ -62,10 +63,11 @@ hydra:
       model.weight_decay: tag(log, interval(1e-6, 1e-3))
       
       # Batch size options
-      data.batch_size: choice(16, 32, 64)
+      data.batch_size: choice(32, 64, 128)
       
       # Optimizer patience for LR scheduler
       model.patience: choice(3, 5, 10)
       
       # Model variants (all small ConvNeXt)
       model.base_model: choice(convnext_atto, convnext_femto, convnext_pico)
+

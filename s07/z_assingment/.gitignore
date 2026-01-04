@@ -1,5 +1,5 @@
 # Data (tracked by DVC)
-data/
+/data/
 
 # Logs and outputs
 logs/
@@ -19,4 +19,4 @@ uv.lock
 
 # But track .dvc folder
 !.dvc
-
+/data

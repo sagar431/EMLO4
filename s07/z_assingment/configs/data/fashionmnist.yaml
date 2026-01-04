@@ -1,0 +1,9 @@
+# Fashion MNIST DataModule configuration
+_target_: src.datamodules.fashionmnist_datamodule.FashionMNISTDataModule
+
+data_dir: ${paths.data_dir}
+batch_size: 64
+num_workers: 4
+pin_memory: True
+val_split: 0.1
+image_size: 224
