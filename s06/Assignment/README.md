@@ -2,6 +2,48 @@
 
 A deep learning model that classifies dog breeds using PyTorch Lightning and ResNet50. Features a web interface for real-time predictions and Docker support for easy deployment.
 
+## 🏆 CML Training Report
+
+### 📊 Training Metrics
+
+```json
+{
+  "best_val_acc": 0.9879940152168274,
+  "test_acc": 0.9964007139205933,
+  "test_loss": 0.010746844112873077
+}
+```
+
+| Metric | Value |
+|--------|-------|
+| **Best Validation Accuracy** | 98.80% |
+| **Test Accuracy** | **99.64%** |
+| **Test Loss** | 0.0107 |
+
+### 📈 Training & Validation Accuracy
+![Training & Validation Accuracy](https://asset.cml.dev/866d451eecaf15f6f19a75d5ded0e91de36f8057?cml=png&cache-bypass=09059ad0-b0e2-4c91-a897-c9dd5129f147)
+
+### 📉 Training & Validation Loss
+![Training & Validation Loss](https://asset.cml.dev/6ffe361f831b71711eaa2435a8548b20071f4674?cml=png&cache-bypass=58b742ce-8370-4a36-9b8f-b51a2c9a3c1f)
+
+### 🔢 Confusion Matrices
+
+#### Training Set
+![Training Confusion Matrix](https://asset.cml.dev/0ab7a3e46fe67be779635bee67e7750c5480ccec?cml=png&cache-bypass=3093bcad-daad-4438-a77e-cc38794d72fd)
+
+#### Test Set
+![Test Confusion Matrix](https://asset.cml.dev/681a3db28cfdb708d7ce7d00e94cddb1bb085aa4?cml=png&cache-bypass=91f8816e-6dff-46d3-a436-b618d561ecec)
+
+### 🔍 Inference Results (Sample Test Images)
+
+![Inference 1](https://asset.cml.dev/6a110fe7f6410fdc7b7a84a7e5bda3abe5b4165e?cml=png&cache-bypass=5ce0cc7f-f62b-4c61-bd99-f8464435819f)
+![Inference 2](https://asset.cml.dev/68c0d6fe28e401825766b4076ba420e05ed439ff?cml=png&cache-bypass=8e2e8f02-b1cb-407e-9b24-38a094bc6c5b)
+![Inference 3](https://asset.cml.dev/33f530bc247ad120eea5d32bf732f6321870dadf?cml=png&cache-bypass=0b61894b-08ba-445e-a0ef-19ebaea581d7)
+![Inference 4](https://asset.cml.dev/de4efc4f90f9cc7dd235df0026b7188d6ca36051?cml=png&cache-bypass=a083f3dc-9261-4e2d-bd1a-cba0444a81d6)
+![Inference 5](https://asset.cml.dev/aa2854df207ae038bbe235178e4bd75e745f68b4?cml=png&cache-bypass=3bafcb72-e70c-4ca3-b278-1d9f12512d7b)
+
+---
+
 ## Features
 
 - ResNet50 model with pretrained weights
@@ -13,42 +55,6 @@ A deep learning model that classifies dog breeds using PyTorch Lightning and Res
 - Rich CLI output with progress bars
 - Data augmentation for better generalization
 - Model evaluation metrics in JSON format
-
-## Project Structure
-```
-/root
-├── src/
-│   ├── train.py         # Training script
-│   ├── eval.py          # Evaluation script
-│   ├── infer.py         # Inference script
-│   ├── app.py           # FastAPI web service
-│   ├── datamodule.py    # Dataset and DataModule
-│   ├── utils/
-│   │   └── logging_config.py
-│   └── samples/         # Sample images for inference
-├── docker/              # Docker configuration
-│   ├── base.Dockerfile
-│   ├── train.Dockerfile
-│   ├── eval.Dockerfile
-│   └── infer.Dockerfile
-├── data/                # Dataset directory
-├── logs/                # Log files
-├── checkpoints/         # Model checkpoints
-├── predictions/         # Inference results
-└── docker-compose.yml   # Docker Compose configuration
-
-## Supported Dog Breeds
-
-1. Beagle
-2. Boxer
-3. Bulldog
-4. Dachshund
-5. German Shepherd
-6. Golden Retriever
-7. Labrador Retriever
-8. Poodle
-9. Rottweiler
-10. Yorkshire Terrier
 
 ## Model Performance
 
