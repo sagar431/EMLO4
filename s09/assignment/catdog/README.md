@@ -15,11 +15,13 @@ This project deploys a Cat-Dog classifier using:
 | File | Description |
 |------|-------------|
 | `server.py` | LitServe API server (baseline, no batching) |
+| `server_optimized.py` | Optimized server (batching + workers + FP16) |
 | `test_client.py` | Test client for verification |
 | `benchmark.py` | Comprehensive benchmarking script |
 | `test_cat.png` | Test cat image |
 | `test_dog.png` | Test dog image |
-| `benchmark_results.png` | Performance visualization |
+| `benchmark_results.png` | Baseline performance visualization |
+| `benchmark_results_optimized.png` | Optimized performance visualization |
 
 ## 🎯 Model Accuracy
 
@@ -32,7 +34,21 @@ The classifier correctly identifies cats and dogs with high confidence:
 
 ---
 
-## 📊 Baseline Performance Results
+## 📊 Performance Comparison
+
+### 🎯 Summary
+
+| Metric | Baseline | Optimized | Improvement |
+|--------|----------|-----------|-------------|
+| **Best Throughput** | 42 reqs/sec | **179 reqs/sec** | **4.3x faster!** 🚀 |
+| **Efficiency** | 1.1% | **4.8%** | +3.7% |
+| **GPU Utilization** | 3-9% | 5-8% | Slightly better |
+| **Best Concurrency** | 8 | **64** | Much better scaling |
+| **p95 Latency** | 68-1581ms | **77-216ms** | Much more consistent |
+
+---
+
+## 📈 Baseline Performance (No Batching)
 
 ### Theoretical Maximum (Direct GPU Inference)
 
@@ -46,7 +62,7 @@ The classifier correctly identifies cats and dogs with high confidence:
 
 **Key Finding**: GPU can process up to **3,696 requests/sec** with optimal batching (64 images).
 
-### API Server Performance (Real-world, No Batching)
+### API Server Performance (Baseline)
 
 | Concurrency | Throughput | Efficiency | CPU Usage | GPU Usage | p95 Latency |
 |-------------|------------|------------|-----------|-----------|-------------|
@@ -55,68 +71,78 @@ The classifier correctly identifies cats and dogs with high confidence:
 | 32          | 40.18 reqs/sec | 1.1% | 33.3% | 3.0% | 778.5ms |
 | 64          | 38.63 reqs/sec | 1.0% | 40.7% | 3.4% | 1580.7ms |
 
----
-
-## 🚨 Performance Analysis
-
-### Key Findings
-
-| Metric | Value |
-|--------|-------|
-| **Theoretical Maximum** | 3,696 reqs/sec |
-| **Actual API Throughput** | 42 reqs/sec |
-| **Efficiency** | **1.1%** (98.9% performance loss!) |
-| **GPU Utilization** | ~3-9% (severely underutilized) |
-| **CPU Utilization** | ~31-41% |
-
-### 📈 Visualization
-
-![Benchmark Results](benchmark_results.png)
-
-The plots reveal:
-1. **Top-Left**: Baseline model scales massively with batch size (553 → 3,696 reqs/sec)
-2. **Top-Right**: API throughput is flat (no batching = no GPU benefit)
-3. **Bottom-Left**: GPU usage is extremely low (~3-9%), indicating GPU is idle most of the time
-4. **Bottom-Right**: Response time increases linearly with concurrency (requests queue up)
-
-### 🔍 Root Cause Analysis
-
-The **98.9% performance gap** exists because:
-
-1. **No Batching**: Server processes ONE image at a time
-   - GPU can handle 64 images in the same time as 1 image
-   - Current: 42 reqs/sec → Potential: 3,696 reqs/sec
-
-2. **CPU Bottleneck**: Image decoding and preprocessing is sequential
-   - Base64 decode → requires CPU
-   - Image transform → requires CPU
-   - Only model inference uses GPU
-
-3. **Single Worker**: Only one worker handles all requests
-   - Requests queue up and wait
-   - p95 latency increases dramatically (68ms → 1,581ms)
+**Baseline Result**: Only **42 reqs/sec** (1.1% efficiency) - massive room for improvement!
 
 ---
 
-## 🚀 Optimization Roadmap
+## 🚀 Optimized Performance
 
-| Optimization | Expected Improvement | Status |
-|--------------|---------------------|--------|
-| **Baseline** | 42 reqs/sec (1.1%) | ✅ Complete |
-| Enable Batching | ~200+ reqs/sec (~5%) | ⏳ Next |
-| Add Workers (4) | ~400+ reqs/sec (~10%) | ⏳ Pending |
-| Parallel Decoding | ~600+ reqs/sec (~16%) | ⏳ Pending |
-| Half Precision (FP16) | ~1,000+ reqs/sec (~27%) | ⏳ Pending |
-| **Fully Optimized** | ~2,000+ reqs/sec (54%+) | 🎯 Target |
+### Optimizations Applied:
+1. ✅ **Batching**: `max_batch_size=64`, `batch_timeout=0.05s`
+2. ✅ **Workers**: `workers_per_device=4`
+3. ✅ **Half Precision**: `torch.bfloat16`
+4. ✅ **Parallel Decoding**: `ThreadPoolExecutor` for image preprocessing
+
+### API Server Performance (Optimized)
+
+| Concurrency | Throughput | Efficiency | CPU Usage | GPU Usage | p95 Latency |
+|-------------|------------|------------|-----------|-----------|-------------|
+| 1           | 14.53 reqs/sec | 0.4% | 3.2% | 5.0% | 77.3ms |
+| 8           | 81.37 reqs/sec | 2.2% | 12.4% | 4.6% | 143.5ms |
+| 32          | 148.92 reqs/sec | 4.0% | 18.5% | 8.5% | 187.0ms |
+| 64          | **179.14 reqs/sec** ⭐ | 4.8% | 26.7% | 8.0% | 216.1ms |
+
+**Optimized Result**: **179 reqs/sec** (4.8% efficiency) - **4.3x improvement!** 🚀
+
+---
+
+## 📉 Visualization
+
+### Baseline Performance
+![Baseline Results](benchmark_results.png)
+
+### Optimized Performance  
+![Optimized Results](benchmark_results_optimized.png)
+
+---
+
+## 🔍 Analysis
+
+### Why 4.3x Improvement?
+
+1. **Batching**: Groups multiple requests together for GPU processing
+2. **Multiple Workers (4)**: Parallel request handling
+3. **Half Precision (bfloat16)**: Faster computation, less memory
+4. **Parallel Decoding**: Image preprocessing uses all CPU cores
+
+### Why Still Only 4.8% Efficiency?
+
+1. **Batch formation**: With 50ms timeout, batches don't always fill to 64
+2. **CPU still bottleneck**: Image decoding takes significant time
+3. **Network overhead**: HTTP request/response adds latency
+4. **Worker synchronization**: 4 workers compete for GPU
+
+### Potential Further Optimizations
+
+| Optimization | Expected Gain |
+|--------------|---------------|
+| Increase batch timeout | +10-20% |
+| More workers (8) | +20-30% |
+| torch.compile() | +15-25% |
+| ONNX Runtime / TensorRT | +50-100% |
 
 ---
 
 ## 🛠️ Usage
 
-### Start Server
+### Start Baseline Server
 ```bash
-cd /home/ubuntu/EMLO4/s09/assignment/catdog
 python server.py
+```
+
+### Start Optimized Server
+```bash
+python server_optimized.py
 ```
 
 ### Test Classification
@@ -142,10 +168,11 @@ pip install litserve timm torch pillow requests psutil gpustat matplotlib numpy
 ## 🎓 Assignment Checklist
 
 - [x] Deploy Cat-Dog classifier with LitServe
-- [x] Benchmark server performance
+- [x] Benchmark server performance  
 - [x] Compare with theoretical maximum throughput
 - [x] Identify bottlenecks (GPU utilization only 3-9%!)
 - [x] Document findings with plots
-- [ ] Optimize incrementally (batching, workers, precision)
+- [x] Optimize incrementally (batching, workers, precision)
+- [x] Achieve **4.3x speedup** (42 → 179 reqs/sec)
 - [ ] Deploy LLM with LitServe
 - [ ] Benchmark LLM tokens/sec
