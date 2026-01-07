@@ -10,24 +10,29 @@ This project deploys an image classification model using LitServe, benchmarks pe
 - **Task**: ImageNet classification (1000 classes)
 
 ## Files
-- `server.py` - LitServe API server (baseline, no batching)
+- `server.py` - LitServe API server (now with batching enabled)
 - `test_clinet.py` - Simple client to test single image inference
 - `benchmark.py` - Comprehensive benchmarking script
-- `benchmark_results.png` - Performance visualization
+- `benchmark_results.png` - Baseline performance (no batching)
+- `benchmark_results_batched.png` - Performance with batching enabled
 
-## Baseline Performance Results
+## Performance Results
 
 ### Theoretical Maximum (Direct GPU Inference)
 | Batch Size | Throughput (reqs/sec) |
 |------------|----------------------|
-| 1          | 118.86               |
-| 8          | 202.43               |
-| 32         | 209.73               |
-| 64         | **217.29** ⭐        |
+| 1          | 110-119 reqs/sec     |
+| 8          | 200-202 reqs/sec     |
+| 32         | 208-210 reqs/sec     |
+| 64         | **217-219** ⭐       |
 
-**Key Finding**: GPU can process up to **217 requests/sec** when batching 64 images together.
+**Key Finding**: GPU can process up to **~218 requests/sec** when batching 64 images together.
 
-### API Server Performance (Real-world)
+---
+
+## Optimization Journey
+
+### 1️⃣ Baseline (No Batching)
 | Concurrency | Throughput (reqs/sec) | CPU Usage | GPU Usage |
 |-------------|----------------------|-----------|-----------|
 | 1           | 35.00                | 27.2%     | 22.2%     |
@@ -35,30 +40,56 @@ This project deploys an image classification model using LitServe, benchmarks pe
 | 32          | 40.81                | 31.2%     | 26.0%     |
 | 64          | 39.75                | 26.8%     | 28.6%     |
 
-**Key Finding**: API server achieves only **42 reqs/sec** - just **19% of theoretical maximum**.
+**Results**: 
+- ❌ Only **42 reqs/sec** (19% efficiency)
+- ❌ GPU severely underutilized (~26%)
+- ❌ Processing one image at a time
+
+![Baseline Results](benchmark_results.png)
+
+---
+
+### 2️⃣ With Batching (max_batch_size=64, batch_timeout=0.01s)
+| Concurrency | Throughput (reqs/sec) | CPU Usage | GPU Usage |
+|-------------|----------------------|-----------|-----------|
+| 1           | 28.02                | 24.4%     | 24.9%     |
+| 8           | 46.05                | 33.3%     | 21.9%     |
+| 32          | **48.75** ⭐         | 37.2%     | 18.0%     |
+| 64          | 47.87                | 47.7%     | 32.2%     |
+
+**Results**:
+- ✅ Improved to **49 reqs/sec** (+16% improvement)
+- ⚠️ Still only **22% efficiency** (49 vs 218 theoretical)
+- ⚠️ GPU usage actually decreased in some cases
+- ⚠️ Batch timeout too short to collect full batches
+
+![Batched Results](benchmark_results_batched.png)
+
+---
 
 ## Performance Analysis
 
-### 🚨 Bottleneck Identified
-- **Current Throughput**: 42 reqs/sec
-- **Theoretical Max**: 217 reqs/sec
-- **Efficiency**: **19%** (81% performance loss!)
-- **GPU Utilization**: ~26% (severely underutilized)
-- **CPU Utilization**: ~27-31% (also underutilized)
+### � Comparison Summary
+| Metric | Baseline | With Batching | Improvement |
+|--------|----------|---------------|-------------|
+| **Best Throughput** | 42 reqs/sec | 49 reqs/sec | **+16%** 🔼 |
+| **Efficiency** | 19% | 22% | +3% |
+| **GPU Utilization** | ~26% | 18-32% | Inconsistent |
+| **Best Concurrency** | 8 | 32 | Better scaling |
+
+### 🔍 Why Batching Didn't Help Much?
+
+**Issues Identified:**
+1. **Batch timeout too short** (10ms) - not enough time to collect 64 requests
+2. **Single worker** - can't process batches efficiently
+3. **CPU bottleneck** - sequential decoding/encoding
+4. **Low concurrency** - not enough simultaneous requests to form batches
 
 ### Root Cause
-The server processes **one image at a time** (no batching), causing:
-1. GPU sits idle between requests
-2. Unable to leverage parallel processing
-3. Network/decoding overhead dominates inference time
-
-### Visualization
-![Benchmark Results](benchmark_results.png)
-
-The plot shows:
-- **Blue line**: Theoretical throughput increases with batch size
-- **Red line**: API throughput remains flat (no batching)
-- **Gap**: Massive performance opportunity
+Even with batching enabled, the server can't form large batches because:
+- Requests arrive too slowly for the 10ms timeout
+- Single worker processes batches sequentially
+- CPU-bound operations (base64 decode, image transforms) are not parallelized
 
 ## Usage
 
@@ -79,13 +110,15 @@ python benchmark.py
 
 ## Next Steps (Optimizations)
 1. ✅ **Baseline established** - 42 reqs/sec
-2. ⏳ Enable batching (`max_batch_size=64`)
+2. ✅ **Enable batching** - 49 reqs/sec (+16% improvement)
 3. ⏳ Add multiple workers (`workers_per_device=4`)
-4. ⏳ Use half-precision (bfloat16/float16)
-5. ⏳ Parallel decoding with ThreadPoolExecutor
-6. ⏳ Compare optimized vs baseline
+4. ⏳ Increase batch timeout for better batch formation
+5. ⏳ Use half-precision (bfloat16/float16)
+6. ⏳ Parallel decoding with ThreadPoolExecutor
+7. ⏳ Final comparison: baseline vs fully optimized
 
-**Expected improvement**: 42 → 200+ reqs/sec (5x speedup)
+**Current**: 49 reqs/sec (22% efficiency)  
+**Target**: 200+ reqs/sec (90%+ efficiency)
 
 ## Requirements
 ```bash

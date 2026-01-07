@@ -28,26 +28,39 @@ class ImageClassifierAPI(ls.LitAPI):
         image_bytes = request.get("image")
         if not image_bytes:
             raise ValueError("No image data provided")
-        
-        # Decode base64 string to bytes
-        img_bytes = base64.b64decode(image_bytes)
-        
-        # Convert bytes to PIL Image
-        image = Image.open(io.BytesIO(img_bytes))
-        # Convert to tensor and move to device
-        tensor = self.transforms(image).unsqueeze(0).to(self.device)
-        return tensor
+        return image_bytes
+    
+    def batch(self, inputs):
+        """Process and batch multiple inputs"""
+        batched_tensors = []
+        for image_bytes in inputs:
+            # Decode base64 string to bytes
+            img_bytes = base64.b64decode(image_bytes)
+            
+            # Convert bytes to PIL Image
+            image = Image.open(io.BytesIO(img_bytes))
+            # Transform image to tensor
+            tensor = self.transforms(image)
+            batched_tensors.append(tensor)
+            
+        # Stack all tensors into a batch
+        return torch.stack(batched_tensors).to(self.device)
 
     @torch.no_grad()
     def predict(self, x):
+        """Run inference on the input batch"""
         outputs = self.model(x)
         probabilities = torch.nn.functional.softmax(outputs, dim=1)
         return probabilities
+    
+    def unbatch(self, output):
+        """Split batch output into individual predictions"""
+        return [output[i] for i in range(len(output))]
 
     def encode_response(self, output):
         """Convert model output to API response"""
         # Get top 5 predictions
-        probs, indices = torch.topk(output[0], k=5)
+        probs, indices = torch.topk(output, k=5)
         
         return {
             "predictions": [
@@ -65,5 +78,7 @@ if __name__ == "__main__":
     server = ls.LitServer(
         api,
         accelerator="gpu",
+        max_batch_size=64,  # Adjust based on your GPU memory and requirements
+        batch_timeout=0.01,  # Timeout in seconds to wait for forming batches
     )
     server.run(port=8000)
