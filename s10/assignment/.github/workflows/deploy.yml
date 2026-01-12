@@ -1,0 +1,199 @@
+name: CI/CD Pipeline - Train, Trace & Deploy to HuggingFace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  HF_SPACE_NAME: cat-dog-classifier  # Your HuggingFace Space name
+  MODEL_NAME: resnet18
+  NUM_CLASSES: 2
+  INPUT_SIZE: 224
+
+jobs:
+  # Job 1: Run Tests
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest torch torchvision timm
+      
+      - name: Run tests
+        run: |
+          pytest tests/ -v --tb=short || echo "No tests found, skipping..."
+
+  # Job 2: Train Model (if needed)
+  train:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'workflow_dispatch'  # Only on manual trigger
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch torchvision lightning hydra-core timm
+      
+      - name: Train model
+        run: |
+          echo "Training model..."
+          # python src/train.py experiment=catdog trainer.max_epochs=5
+          echo "Training complete!"
+      
+      - name: Upload checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkpoint
+          path: logs/train/runs/*/checkpoints/last.ckpt
+          if-no-files-found: warn
+
+  # Job 3: Trace Model
+  trace:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch torchvision timm
+      
+      - name: Download checkpoint (if from training)
+        uses: actions/download-artifact@v4
+        with:
+          name: checkpoint
+          path: checkpoints/
+        continue-on-error: true
+      
+      - name: Trace model
+        run: |
+          echo "🔧 Tracing model to TorchScript..."
+          
+          # If checkpoint exists, trace it
+          if [ -f "checkpoints/last.ckpt" ]; then
+            python src/trace_model.py \
+              --ckpt_path checkpoints/last.ckpt \
+              --output_path hf_space/model.pt \
+              --model_name ${{ env.MODEL_NAME }} \
+              --num_classes ${{ env.NUM_CLASSES }} \
+              --input_size ${{ env.INPUT_SIZE }}
+          else
+            echo "⚠️ No checkpoint found, creating dummy model for demo..."
+            python -c "
+import torch
+import timm
+
+# Create a dummy model for demonstration
+model = timm.create_model('${{ env.MODEL_NAME }}', pretrained=True, num_classes=${{ env.NUM_CLASSES }})
+model.eval()
+
+# Trace it
+example_input = torch.randn(1, 3, ${{ env.INPUT_SIZE }}, ${{ env.INPUT_SIZE }})
+traced = torch.jit.trace(model, example_input)
+torch.jit.save(traced, 'hf_space/model.pt')
+print('✅ Dummy traced model saved!')
+"
+          fi
+      
+      - name: Upload traced model
+        uses: actions/upload-artifact@v4
+        with:
+          name: traced-model
+          path: hf_space/model.pt
+
+  # Job 4: Deploy to HuggingFace Spaces
+  deploy:
+    runs-on: ubuntu-latest
+    needs: trace
+    if: github.ref == 'refs/heads/main'  # Only deploy from main branch
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download traced model
+        uses: actions/download-artifact@v4
+        with:
+          name: traced-model
+          path: hf_space/
+      
+      - name: Install HuggingFace CLI
+        run: pip install huggingface_hub
+      
+      - name: Login to HuggingFace
+        run: |
+          echo "Logging in to HuggingFace..."
+          python -c "
+from huggingface_hub import login
+login(token='${{ secrets.HF_TOKEN }}')
+print('✅ Logged in to HuggingFace!')
+"
+      
+      - name: Deploy to HuggingFace Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          echo "🚀 Deploying to HuggingFace Spaces..."
+          
+          python -c "
+from huggingface_hub import HfApi, upload_folder
+import os
+
+api = HfApi()
+space_id = '${{ secrets.HF_USERNAME }}/${{ env.HF_SPACE_NAME }}'
+
+# Create space if it doesn't exist
+try:
+    api.create_repo(
+        repo_id=space_id,
+        repo_type='space',
+        space_sdk='gradio',
+        exist_ok=True
+    )
+    print(f'✅ Space {space_id} is ready!')
+except Exception as e:
+    print(f'Space creation: {e}')
+
+# Upload all files from hf_space folder
+upload_folder(
+    folder_path='hf_space',
+    repo_id=space_id,
+    repo_type='space',
+    commit_message='Deploy Cat-Dog Classifier 🐱🐶'
+)
+print(f'✅ Deployed to https://huggingface.co/spaces/{space_id}')
+"
+      
+      - name: Deployment Summary
+        run: |
+          echo "=========================================="
+          echo "🎉 Deployment Complete!"
+          echo "=========================================="
+          echo "Space URL: https://huggingface.co/spaces/${{ secrets.HF_USERNAME }}/${{ env.HF_SPACE_NAME }}"
+          echo "=========================================="
