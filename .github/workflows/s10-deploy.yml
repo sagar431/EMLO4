@@ -143,15 +143,12 @@ jobs:
           name: traced-model
           path: ${{ env.WORKING_DIR }}/hf_space/
 
-      - name: Install HuggingFace CLI
-        run: pip install huggingface_hub
-
-      - name: Login to HuggingFace
+      - name: Install HuggingFace CLI and Login
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          echo "Logging in to HuggingFace..."
-          huggingface-cli login --token $HF_TOKEN
+          pip install huggingface_hub
+          huggingface-cli login --token $HF_TOKEN --add-to-git-credential
 
       - name: Deploy to HuggingFace Spaces
         env:
