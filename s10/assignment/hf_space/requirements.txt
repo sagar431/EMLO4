@@ -1,4 +1,4 @@
 torch
 torchvision
-gradio==5.9.1
+gradio==4.0.0
 pillow
