@@ -1,0 +1,48 @@
+name: Deploy to Modal
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 's11/assignment/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 's11/assignment/**'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Modal CLI
+        run: |
+          pip install modal
+
+      - name: Authenticate with Modal
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          modal token set --token-id $MODAL_TOKEN_ID --token-secret $MODAL_TOKEN_SECRET
+
+      - name: Deploy to Modal
+        working-directory: s11/assignment
+        run: |
+          modal deploy modal_fasthtml_app.py
+
+      - name: Output Deployment URL
+        run: |
+          echo "🎉 Deployed successfully!"
+          echo "URL: https://ailab--cat-dog-classifier-fasthtml-web.modal.run"
