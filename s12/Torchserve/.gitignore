@@ -1,0 +1,30 @@
+# Model files (too large for git)
+z-image-model/
+z-image-model.zip
+*.mar
+models/*.mar
+
+# Backup files
+*.bak
+
+# Generated images
+generated_images/
+torchserve_output_*.png
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# Virtual environment
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Temp files
+empty.txt

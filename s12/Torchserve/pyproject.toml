@@ -1,0 +1,16 @@
+[project]
+name = "z-image-turbo"
+version = "0.1.0"
+description = "Z-Image-Turbo image generation using diffusers"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "diffusers",
+    "transformers",
+    "accelerate",
+    "huggingface-hub",
+    "nvitop>=1.6.1",
+]
+
+[tool.uv]
+dev-dependencies = []
