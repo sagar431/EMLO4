@@ -1,0 +1,40 @@
+2026-01-15T11:52:28,890 [INFO ] epollEventLoopGroup-3-55 ACCESS_LOG - /172.17.0.1:52784 "GET /models/z-image HTTP/1.1" 200 25
+2026-01-15T11:52:28,890 [INFO ] epollEventLoopGroup-3-55 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477948
+2026-01-15T11:52:29,803 [INFO ] pool-2-thread-10 ACCESS_LOG - /172.17.0.1:41934 "GET /ping HTTP/1.1" 200 0
+2026-01-15T11:52:29,804 [INFO ] pool-2-thread-10 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477949
+2026-01-15T11:52:29,831 [INFO ] epollEventLoopGroup-3-57 ACCESS_LOG - /172.17.0.1:38816 "GET /models/z-image HTTP/1.1" 200 25
+2026-01-15T11:52:29,831 [INFO ] epollEventLoopGroup-3-57 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477949
+2026-01-15T11:52:58,863 [INFO ] pool-2-thread-10 ACCESS_LOG - /172.17.0.1:58402 "GET /ping HTTP/1.1" 200 0
+2026-01-15T11:52:58,864 [INFO ] pool-2-thread-10 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477978
+2026-01-15T11:52:58,891 [INFO ] epollEventLoopGroup-3-59 ACCESS_LOG - /172.17.0.1:58816 "GET /models/z-image HTTP/1.1" 200 25
+2026-01-15T11:52:58,891 [INFO ] epollEventLoopGroup-3-59 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477978
+2026-01-15T11:52:59,803 [INFO ] pool-2-thread-10 ACCESS_LOG - /172.17.0.1:59204 "GET /ping HTTP/1.1" 200 1
+2026-01-15T11:52:59,803 [INFO ] pool-2-thread-10 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477979
+2026-01-15T11:52:59,829 [INFO ] epollEventLoopGroup-3-1 ACCESS_LOG - /172.17.0.1:33770 "GET /models/z-image HTTP/1.1" 200 24
+2026-01-15T11:52:59,829 [INFO ] epollEventLoopGroup-3-1 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477979
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - CPUUtilization.Percent:0.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - DiskAvailable.Gigabytes:358.82065200805664|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - DiskUsage.Gigabytes:137.19390869140625|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - DiskUtilization.Percent:27.7|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - GPUMemoryUtilization.Percent:64.60205078125|#Level:Host,DeviceId:0|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - GPUMemoryUsed.Megabytes:26461.0|#Level:Host,DeviceId:0|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - GPUUtilization.Percent:0.0|#Level:Host,DeviceId:0|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - MemoryAvailable.Megabytes:213284.5234375|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - MemoryUsed.Megabytes:6175.60546875|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:18,915 [INFO ] pool-3-thread-2 TS_METRICS - MemoryUtilization.Percent:3.7|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768477998
+2026-01-15T11:53:28,844 [INFO ] pool-2-thread-10 ACCESS_LOG - /172.17.0.1:51762 "GET /ping HTTP/1.1" 200 0
+2026-01-15T11:53:28,844 [INFO ] pool-2-thread-10 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478008
+2026-01-15T11:53:28,871 [INFO ] epollEventLoopGroup-3-3 ACCESS_LOG - /172.17.0.1:34078 "GET /models/z-image HTTP/1.1" 200 25
+2026-01-15T11:53:28,871 [INFO ] epollEventLoopGroup-3-3 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478008
+2026-01-15T11:53:29,803 [INFO ] pool-2-thread-10 ACCESS_LOG - /172.17.0.1:40388 "GET /ping HTTP/1.1" 200 0
+2026-01-15T11:53:29,803 [INFO ] pool-2-thread-10 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478009
+2026-01-15T11:53:29,829 [INFO ] epollEventLoopGroup-3-5 ACCESS_LOG - /172.17.0.1:49444 "GET /models/z-image HTTP/1.1" 200 24
+2026-01-15T11:53:29,830 [INFO ] epollEventLoopGroup-3-5 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478009
+2026-01-15T11:53:58,863 [INFO ] pool-2-thread-10 ACCESS_LOG - /172.17.0.1:43518 "GET /ping HTTP/1.1" 200 0
+2026-01-15T11:53:58,863 [INFO ] pool-2-thread-10 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478038
+2026-01-15T11:53:58,889 [INFO ] epollEventLoopGroup-3-7 ACCESS_LOG - /172.17.0.1:56422 "GET /models/z-image HTTP/1.1" 200 24
+2026-01-15T11:53:58,890 [INFO ] epollEventLoopGroup-3-7 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478038
+2026-01-15T11:53:59,784 [INFO ] pool-2-thread-10 ACCESS_LOG - /172.17.0.1:45948 "GET /ping HTTP/1.1" 200 1
+2026-01-15T11:53:59,784 [INFO ] pool-2-thread-10 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478039
+2026-01-15T11:53:59,810 [INFO ] epollEventLoopGroup-3-9 ACCESS_LOG - /172.17.0.1:50178 "GET /models/z-image HTTP/1.1" 200 24
+2026-01-15T11:53:59,810 [INFO ] epollEventLoopGroup-3-9 TS_METRICS - Requests2XX.Count:1.0|#Level:Host|#hostname:4664aeaf9c67,timestamp:1768478039

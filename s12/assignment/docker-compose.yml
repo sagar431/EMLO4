@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # TorchServe Backend
+  torchserve:
+    image: pytorch/torchserve:0.12.0-gpu
+    container_name: z-image-torchserve
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - HF_HOME=/home/model-server/hf_cache
+    volumes:
+      - ./config.properties:/home/model-server/config.properties
+      - ./models:/tmp/models
+      - ./model_store:/home/model-server/model_store
+      - hf_cache:/home/model-server/hf_cache
+    ports:
+      - "8080:8080"   # Inference API
+      - "8081:8081"   # Management API
+      - "8082:8082"   # Metrics API
+    command: torchserve --model-store=/tmp/models --start
+    shm_size: '2gb'
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    networks:
+      - z-image-network
+
+  # FastAPI Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: z-image-frontend
+    environment:
+      - TORCHSERVE_URL=http://torchserve:8080
+      - MODEL_NAME=z-image
+    ports:
+      - "8000:8000"
+    depends_on:
+      torchserve:
+        condition: service_healthy
+    networks:
+      - z-image-network
+    restart: unless-stopped
+
+networks:
+  z-image-network:
+    driver: bridge
+
+volumes:
+  hf_cache:
+    driver: local

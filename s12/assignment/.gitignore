@@ -1,0 +1,17 @@
+# Model files
+model_store/
+*.mar
+
+# Generated images
+generated_images/
+
+# Cache
+__pycache__/
+*.py[cod]
+.eggs/
+
+# Temp
+empty.txt
+
+# Logs
+*.log
