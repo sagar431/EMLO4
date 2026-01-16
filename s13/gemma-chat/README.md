@@ -1,13 +1,13 @@
-# ✨ Gemma Chat on Kubernetes
+# ✨ TinyLlama Chat on Kubernetes
 
 <div align="center">
 
 ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![HuggingFace](https://img.shields.io/badge/🤗%20Hugging%20Face-FFD21E?style=for-the-badge)
+![TinyLlama](https://img.shields.io/badge/🦙%20TinyLlama-FFD21E?style=for-the-badge)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
-**Chat with Google's Gemma-3-270M-IT model deployed on Kubernetes!**
+**Chat with TinyLlama-1.1B-Chat model deployed on Kubernetes!**
 
 </div>
 
@@ -33,11 +33,13 @@ kubectl apply -f k8s/
 
 ### 3️⃣ Access the App
 
+**For Lambda Labs / Remote:**
+Run this on your LOCAL machine:
 ```bash
-kubectl port-forward service/gemma-chat-service 8001:80
+ssh -L 8001:localhost:8001 ubuntu@<YOUR_LAMBDA_IP>
 ```
 
-Open: http://localhost:8001
+Then open: **http://localhost:8001**
 
 ---
 
@@ -45,24 +47,25 @@ Open: http://localhost:8001
 
 ```
 gemma-chat/
-├── app.py              # FastAPI + Chat UI
+├── app.py              # FastAPI + TinyLlama Chat UI
 ├── Dockerfile          
 ├── requirements.txt    
 └── k8s/
-    ├── deployment.yaml 
-    ├── service.yaml    
-    └── ingress.yaml    
+    ├── deployment.yaml # 1 Replica, 2GB RAM Request
+    ├── service.yaml    # ClusterIP Service
+    └── ingress.yaml    # Ingress (host: gemma-chat.localhost)
 ```
 
 ---
 
 ## 🎨 Features
 
-- 💬 Modern chat interface with typing indicators
-- 🤗 Pulls Gemma model from Hugging Face
+- 💬 Modern chat interface with glassmorphism design
+- 🦙 **TinyLlama-1.1B-Chat** model (Open Source, No Auth required!)
 - ⚡ FastAPI backend with async support
-- 📚 Auto-generated API docs at `/docs`
+- 🌊 Streaming-like user experience (typing indicators)
 
 ---
 
-**Just for fun! 🎉**
+**Note:** The first time you deploy, it may take 2-3 minutes to download the model (2.2GB). Check status with:
+`kubectl logs -l app=gemma-chat -f`
